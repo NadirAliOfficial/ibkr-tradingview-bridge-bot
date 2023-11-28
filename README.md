@@ -96,4 +96,4 @@ MIT License. Use at your own risk. Not responsible for financial losses or broke
 Built by [Nadir Ali Khan / Team NAK] with ❤️ using:
 - [ib_insync](https://github.com/erdewit/ib_insync)
 - [FastAPI](https://fastapi.tiangolo.com/)
-<!-- updated: 2023-08-08-r01 -->
+<!-- updated: 2023-11-28-r01 -->
