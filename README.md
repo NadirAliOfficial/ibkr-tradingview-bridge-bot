@@ -98,3 +98,4 @@ Built by [Nadir Ali Khan / Team NAK] with ❤️ using:
 - [FastAPI](https://fastapi.tiangolo.com/)
 <!-- updated: 2026-05-30 -->
 
+
