@@ -1,0 +1,7 @@
+{
+    "use_paper": true,
+    "default_symbol": "AAPL",
+    "default_qty": 10,
+    "stop_loss_pct": 0.02
+  }
+  
