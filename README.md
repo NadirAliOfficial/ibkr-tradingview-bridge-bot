@@ -97,3 +97,4 @@ Built by [Nadir Ali Khan / Team NAK] with ❤️ using:
 - [ib_insync](https://github.com/erdewit/ib_insync)
 - [FastAPI](https://fastapi.tiangolo.com/)
 <!-- updated: 2026-05-30 -->
+
