@@ -94,7 +94,7 @@ def ib_thread():
                 if ib.isConnected():
                     try:
                         ib.disconnect()
-                    except:
+                    except Exception:
                         pass
                 
                 if attempt < max_retries - 1:
