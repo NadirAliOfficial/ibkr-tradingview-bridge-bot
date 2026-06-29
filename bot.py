@@ -46,7 +46,7 @@ def run_in_ib_thread(func, *args, **kwargs):
     global ib
     if ib is None or not ib.isConnected():
         raise Exception("IB not connected")
-    
+
     # Use ib.waitOnUpdate() which is thread-safe instead of running in the event loop
     try:
         result = func(*args, **kwargs)
@@ -68,23 +68,23 @@ def ib_thread():
         elif ib.isConnected():
             logging.info("IB already connected, skipping connection attempt")
             return
-        
+
         port = config["IB_PORT_PAPER"] if config["PAPER_TRADING"] else config["IB_PORT_LIVE"]
-        
+
         # Try to connect with exponential backoff
         max_retries = 3
         retry_delay = 2
-        
+
         for attempt in range(max_retries):
             try:
                 # Generate a new client ID for each attempt to avoid conflicts
                 client_id = config["CLIENT_ID"] + attempt
                 logging.info(f"Attempting connection with clientId {client_id}")
-                
+
                 if ib.isConnected():
                     ib.disconnect()
                     time.sleep(1)  # Give it a moment to fully disconnect
-                
+
                 ib.connect(config["IB_HOST"], port, clientId=client_id)
                 ib_connected = True
                 logging.info(f"✅ IBKR connected on port {port} with clientId {client_id}")
@@ -96,14 +96,14 @@ def ib_thread():
                         ib.disconnect()
                     except Exception:
                         pass
-                
+
                 if attempt < max_retries - 1:
                     retry_delay = retry_delay * 2
                     logging.info(f"Retrying in {retry_delay} seconds...")
                     time.sleep(retry_delay)
                 else:
                     logging.error("Failed to connect after maximum retries")
-    
+
     if ib_connected and ib.isConnected():
         try:
             ib.run()  # starts the ib_insync event loop
@@ -114,18 +114,18 @@ def ib_thread():
 # Start IBKR thread
 def ensure_connection():
     global ib, ib_connected, ib_thread_instance
-    
+
     with connection_lock:
         if ib is None or not ib.isConnected():
             # If there's an existing thread, make sure it's not running
             if 'ib_thread_instance' in globals() and ib_thread_instance.is_alive():
                 logging.info("Waiting for existing connection thread to complete")
                 ib_thread_instance.join(timeout=5)
-            
+
             logging.info("Starting new IB connection thread")
             ib_thread_instance = threading.Thread(target=ib_thread, daemon=True)
             ib_thread_instance.start()
-            
+
             # Give it time to connect
             timeout = 10
             start_time = time.time()
@@ -133,7 +133,7 @@ def ensure_connection():
                 if ib_connected and ib is not None and ib.isConnected():
                     return True
                 time.sleep(0.5)
-            
+
             return ib_connected and ib is not None and ib.isConnected()
         else:
             return True
@@ -150,14 +150,14 @@ positions = {}
 @app.post("/webhook")
 async def webhook(request: Request, x_api_key: str = Header(None)):
     global ib, ib_connected
-    
+
     if x_api_key != config["WEBHOOK_TOKEN"]:
         raise HTTPException(status_code=401, detail="Invalid API token")
-    
+
     # Ensure IB is connected before proceeding
     if not ensure_connection():
         raise HTTPException(status_code=503, detail="IB connection not available after retry")
-    
+
     data = await request.json()
     logging.info(f"📩 Received alert: {data}")
 
@@ -228,7 +228,7 @@ async def webhook(request: Request, x_api_key: str = Header(None)):
                 fill_price = ticker.marketPrice()
         else:
             fill_price = float(limit_price)
-                
+
         # If we still don't have a price for stop loss calculation, use a default
         if not fill_price or fill_price <= 0:
             logging.warning(f"No valid price available for SL/TP calculation, skipping SL/TP orders")
@@ -279,7 +279,7 @@ async def webhook(request: Request, x_api_key: str = Header(None)):
             f.write(json.dumps(record) + "\n")
 
         return {"status":"success","order_id":oid}
-        
+
     except Exception as e:
         logging.error(f"Error placing order: {str(e)}")
         return {"status":"error","message":f"Order placement failed: {str(e)}"}
